@@ -98,6 +98,10 @@ Dopo il BFS generazionale, i fratelli (stesso set di genitori) vengono ordinati 
 - [x] Tasto `Delete` per rimuovere nodi/archi selezionati
 - [x] MiniMap e Controls ReactFlow
 - [x] Repository GitHub: `github.com/Lumakeo/progetto-genogramma`
+- [x] 12 tipi edge SVG (6 originali + adoption-child, twins, close, conflictual, distant, cut-off)
+- [x] EdgePanel raggruppato per categoria con Anno relazione solo per coppie
+- [x] MarriedEdge condizionale (singola/doppia in base alla presenza di figli)
+- [x] Auto-layout automatico all'aggiunta di edge genitore-figlio
 
 ---
 
@@ -123,6 +127,16 @@ Dopo il BFS generazionale, i fratelli (stesso set di genitori) vengono ordinati 
 - **Anno sulla linea di coppia**: campo in EdgePanel, label SVG sopra la linea
 - `NodeLabel` semplificato: mostra solo nome, professione, data di morte (†)
 - `ageUtils.ts`: utility condivisa per calcolo età
+
+### Sessione 3 — 22 aprile 2026
+- **EdgePanel** raggruppato in 3 categorie: Strutturali / Coppia / Relazione emotiva
+- **6 nuovi tipi edge SVG**: `adoption-child` (tratteggiato con barra), `twins` (V invertita), `close` (curva), `conflictual` (zigzag), `distant` (linea sottile), `cut-off` (doppi tagli)
+- **`EdgeType`** in `types.ts` aggiornato a 12 tipi totali
+- **Handles nodi** allineati a `top: 26` (centro verticale del simbolo 52×52)
+- **`MarriedEdge` condizionale**: linea singola se coppia senza figli, doppia parallela se ha figli (legge `allEdges` da `useStore`)
+- **Fix tronco**: `ParentChildEdge`/`AdoptionChildEdge` ora disegnano sempre `trunk→barY→drop`, mai linea diagonale diretta al figlio
+- **Auto-layout su `onConnect`**: quando si aggiunge un edge `parent-child` o `adoption-child`, `computeLayout` viene rieseguito automaticamente e la vista si adatta
+- **`adoption-child` nel BFS layout**: incluso nel calcolo generazionale e nel centering (prima ignorato)
 
 ---
 
