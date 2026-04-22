@@ -8,11 +8,11 @@ export function DeceasedMaleNode({ data, selected }: NodeProps<PersonData>) {
   const sw = selected ? 2.5 : 2
   const age = calcAgeAtDeath(data.birthYear, data.deathYear)
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center" style={{ width: 52 }}>
       <Handle type="target" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Bottom} id="bottom" />
-      <Handle type="source" position={Position.Left} id="left" />
-      <Handle type="source" position={Position.Right} id="right" />
+      <Handle type="source" position={Position.Left} id="left" style={{ top: 26 }} />
+      <Handle type="source" position={Position.Right} id="right" style={{ top: 26 }} />
       <svg width="52" height="52" viewBox="0 0 52 52">
         <rect x="2" y="2" width="48" height="48" fill="white" stroke={stroke} strokeWidth={sw} />
         <line x1="2" y1="2" x2="50" y2="50" stroke={stroke} strokeWidth="2" />

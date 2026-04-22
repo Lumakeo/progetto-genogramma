@@ -23,6 +23,12 @@ export type EdgeType =
   | 'cohabiting'
   | 'separated-cohabiting'
   | 'parent-child'
+  | 'adoption-child'
+  | 'twins'
+  | 'close'
+  | 'conflictual'
+  | 'distant'
+  | 'cut-off'
 
 export type Band = 'origin' | 'nuclear' | 'derived'
 

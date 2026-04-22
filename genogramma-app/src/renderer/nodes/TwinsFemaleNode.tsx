@@ -8,12 +8,12 @@ export function TwinsFemaleNode({ data, selected }: NodeProps<PersonData>) {
   const sw = selected ? 2.5 : 2
   const age = calcAge(data.birthYear)
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center" style={{ width: 110 }}>
       <Handle type="target" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Bottom} id="bottom-left" style={{ left: '25%' }} />
       <Handle type="source" position={Position.Bottom} id="bottom-right" style={{ left: '75%' }} />
-      <Handle type="source" position={Position.Left} id="left" />
-      <Handle type="source" position={Position.Right} id="right" />
+      <Handle type="source" position={Position.Left} id="left" style={{ top: 26 }} />
+      <Handle type="source" position={Position.Right} id="right" style={{ top: 26 }} />
       <svg width="110" height="52" viewBox="0 0 110 52">
         <circle cx="26" cy="26" r="24" fill="white" stroke={color} strokeWidth={sw} />
         <circle cx="84" cy="26" r="24" fill="white" stroke={color} strokeWidth={sw} />

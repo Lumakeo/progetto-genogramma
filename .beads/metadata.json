@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "progetto_genogramma",
+  "project_id": "f6a07116-c9a4-4419-93d9-45995c04a0b0"
+}

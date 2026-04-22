@@ -2,13 +2,38 @@ import { Edge } from 'reactflow'
 import { X, Trash2 } from 'lucide-react'
 import { EdgeType } from '../../../shared/types'
 
-const EDGE_TYPE_LABELS: { type: EdgeType; label: string }[] = [
-  { type: 'parent-child', label: 'Genitore-figlio' },
-  { type: 'married', label: 'Sposati (doppia linea)' },
-  { type: 'separated', label: 'Separati (un taglio)' },
-  { type: 'divorced', label: 'Divorziati (due tagli)' },
-  { type: 'cohabiting', label: 'Conviventi (tratteggiata)' },
-  { type: 'separated-cohabiting', label: 'Sep. convivenza' },
+const COUPLE_TYPES = new Set<EdgeType>([
+  'married', 'separated', 'divorced', 'cohabiting', 'separated-cohabiting'
+])
+
+const EDGE_GROUPS: { label: string; types: { type: EdgeType; label: string }[] }[] = [
+  {
+    label: 'Strutturali',
+    types: [
+      { type: 'parent-child', label: 'Genitore-figlio' },
+      { type: 'adoption-child', label: 'Adozione (tratteggiata)' },
+      { type: 'twins', label: 'Gemelli (V invertita)' },
+    ],
+  },
+  {
+    label: 'Coppia',
+    types: [
+      { type: 'married', label: 'Sposati (doppia linea)' },
+      { type: 'separated', label: 'Separati (un taglio)' },
+      { type: 'divorced', label: 'Divorziati (due tagli)' },
+      { type: 'cohabiting', label: 'Conviventi (tratteggiata)' },
+      { type: 'separated-cohabiting', label: 'Sep. convivenza' },
+    ],
+  },
+  {
+    label: 'Relazione emotiva',
+    types: [
+      { type: 'close', label: 'Stretta (curva)' },
+      { type: 'conflictual', label: 'Conflittuale (zigzag)' },
+      { type: 'distant', label: 'Distante (linea sottile)' },
+      { type: 'cut-off', label: 'Cut-off (doppio taglio)' },
+    ],
+  },
 ]
 
 interface Props {
@@ -40,13 +65,17 @@ export function EdgePanel({ edge, onTypeChange, onDataChange, onDelete, onClose 
             onChange={(e) => onTypeChange(edge.id, e.target.value as EdgeType)}
             className="w-full text-sm border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
           >
-            {EDGE_TYPE_LABELS.map((et) => (
-              <option key={et.type} value={et.type}>{et.label}</option>
+            {EDGE_GROUPS.map((group) => (
+              <optgroup key={group.label} label={group.label}>
+                {group.types.map((et) => (
+                  <option key={et.type} value={et.type}>{et.label}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>
 
-        {edge.type !== 'parent-child' && (
+        {COUPLE_TYPES.has((edge.type ?? '') as EdgeType) && (
           <div>
             <label className="text-xs font-medium text-slate-500 block mb-1">Anno relazione</label>
             <input
