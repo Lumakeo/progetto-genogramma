@@ -60,16 +60,32 @@ function YearLabel({ sourceX, sourceY, targetX, targetY, year, color }: {
 
 // ─── couple edges ─────────────────────────────────────────────────────────────
 
-export function MarriedEdge({ sourceX, sourceY, targetX, targetY, selected, data }: EdgeProps) {
+export function MarriedEdge({ source, target, sourceX, sourceY, targetX, targetY, selected, data }: EdgeProps) {
+  const allEdges = useStore((s) => s.edges)
+  const hasChildren = allEdges.some(
+    (e) => (e.type === 'parent-child' || e.type === 'adoption-child') &&
+            (e.source === source || e.source === target)
+  )
   const color = selected ? '#3b82f6' : '#1e293b'
   const sw = selected ? 2.5 : 2
-  const [p1, p2] = parallelPaths(sourceX, sourceY, targetX, targetY, 3.5)
   const [hit] = getStraightPath({ sourceX, sourceY, targetX, targetY })
+
+  if (hasChildren) {
+    const [p1, p2] = parallelPaths(sourceX, sourceY, targetX, targetY, 3.5)
+    return (
+      <g>
+        <HitArea path={hit} />
+        <path d={p1} fill="none" stroke={color} strokeWidth={sw} />
+        <path d={p2} fill="none" stroke={color} strokeWidth={sw} />
+        {data?.year && <YearLabel sourceX={sourceX} sourceY={sourceY} targetX={targetX} targetY={targetY} year={String(data.year)} color={color} />}
+      </g>
+    )
+  }
+
   return (
     <g>
       <HitArea path={hit} />
-      <path d={p1} fill="none" stroke={color} strokeWidth={sw} />
-      <path d={p2} fill="none" stroke={color} strokeWidth={sw} />
+      <path d={hit} fill="none" stroke={color} strokeWidth={sw} />
       {data?.year && <YearLabel sourceX={sourceX} sourceY={sourceY} targetX={targetX} targetY={targetY} year={String(data.year)} color={color} />}
     </g>
   )
@@ -172,22 +188,7 @@ export function ParentChildEdge({
     })
     .filter((s): s is { id: string; cx: number } => s !== null)
 
-  if (sibXs.length === 0) {
-    const d = `M ${trunkX} ${trunkStartY} L ${targetX} ${targetY}`
-    return (
-      <g>
-        <path d={d} fill="none" stroke="transparent" strokeWidth={14} />
-        <path id={id} d={d} fill="none" stroke={color} strokeWidth={sw} />
-      </g>
-    )
-  }
-
-  const minX = Math.min(...sibXs.map((s) => s.cx))
-  const maxX = Math.max(...sibXs.map((s) => s.cx))
   const barY = trunkStartY + (targetY - trunkStartY) * 0.55
-
-  const sorted = [...sibXs].sort((a, b) => a.cx - b.cx)
-  const isPrimary = sorted[0]?.id === target || sibXs.length === 1
 
   // Check if this target has a twins sibling → diagonal drop
   const twinEdge = allEdges.find(
@@ -200,8 +201,28 @@ export function ParentChildEdge({
   const twinSibCX = twinSibNode?.positionAbsolute
     ? twinSibNode.positionAbsolute.x + (twinSibNode.width ?? 52) / 2
     : null
-  // Apex X for twins diagonal: midpoint between the two twins
   const apexX = twinSibCX !== null ? (targetX + twinSibCX) / 2 : targetX
+
+  if (sibXs.length === 0) {
+    // Figlio unico: tronco verticale + drop (mai linea diagonale diretta)
+    const d = [
+      `M ${trunkX} ${trunkStartY} L ${trunkX} ${barY}`,
+      Math.abs(trunkX - apexX) > 2 ? `M ${trunkX} ${barY} L ${apexX} ${barY}` : '',
+      `M ${apexX} ${barY} L ${targetX} ${targetY}`,
+    ].filter(Boolean).join(' ')
+    return (
+      <g>
+        <path d={d} fill="none" stroke="transparent" strokeWidth={14} />
+        <path id={id} d={d} fill="none" stroke={color} strokeWidth={sw} />
+      </g>
+    )
+  }
+
+  const minX = Math.min(...sibXs.map((s) => s.cx))
+  const maxX = Math.max(...sibXs.map((s) => s.cx))
+
+  const sorted = [...sibXs].sort((a, b) => a.cx - b.cx)
+  const isPrimary = sorted[0]?.id === target || sibXs.length === 1
 
   const parts: string[] = []
   // Drop from bar to this child (diagonal if twins, vertical otherwise)
@@ -264,8 +285,14 @@ export function AdoptionChildEdge({
     })
     .filter((s): s is { id: string; cx: number } => s !== null)
 
+  const barY = trunkStartY + (targetY - trunkStartY) * 0.55
+
   if (sibXs.length === 0) {
-    const d = `M ${trunkX} ${trunkStartY} L ${targetX} ${targetY}`
+    const d = [
+      `M ${trunkX} ${trunkStartY} L ${trunkX} ${barY}`,
+      Math.abs(trunkX - targetX) > 2 ? `M ${trunkX} ${barY} L ${targetX} ${barY}` : '',
+      `M ${targetX} ${barY} L ${targetX} ${targetY}`,
+    ].filter(Boolean).join(' ')
     return (
       <g>
         <path d={d} fill="none" stroke="transparent" strokeWidth={14} />
@@ -276,7 +303,6 @@ export function AdoptionChildEdge({
 
   const minX = Math.min(...sibXs.map((s) => s.cx))
   const maxX = Math.max(...sibXs.map((s) => s.cx))
-  const barY = trunkStartY + (targetY - trunkStartY) * 0.55
 
   const sorted = [...sibXs].sort((a, b) => a.cx - b.cx)
   const isPrimary = sorted[0]?.id === target || sibXs.length === 1
