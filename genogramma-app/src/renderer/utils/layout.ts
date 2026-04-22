@@ -77,19 +77,56 @@ export function computeLayout(nodes: Node<PersonData>[], edges: Edge[]): Node<Pe
     byLevel[l].push(n.id)
   }
 
-  // Order nodes within each level: keep couples adjacent
+  // Order nodes within each level: sort siblings by birth year desc (youngest left), keep couples adjacent
   const couplePartner: Record<string, string> = {}
   for (const e of coupleEdges) {
     couplePartner[e.source] = e.target
     couplePartner[e.target] = e.source
   }
 
+  const nodeMap = Object.fromEntries(nodes.map((n) => [n.id, n]))
+
+  const birthSortKey = (id: string): [number, number, number] => {
+    const d = nodeMap[id]?.data
+    const y = parseInt(d?.birthYear || '0')
+    const m = parseInt(d?.birthMonth || '0')
+    const day = parseInt(d?.birthDay || '0')
+    return [y, m, day]
+  }
+
+  // Sort descending: youngest (highest year) goes to the left (lower index)
+  const sortByAge = (ids: string[]) =>
+    ids.slice().sort((a, b) => {
+      const [ya, ma, da] = birthSortKey(a)
+      const [yb, mb, db] = birthSortKey(b)
+      if (ya === 0 && yb === 0) return 0
+      if (ya === 0) return 1
+      if (yb === 0) return -1
+      if (ya !== yb) return yb - ya
+      if (ma !== mb) return mb - ma
+      return db - da
+    })
+
   const orderedByLevel: Record<number, string[]> = {}
   for (const [lvl, ids] of Object.entries(byLevel)) {
     const ordered: string[] = []
     const placed = new Set<string>()
+
+    // Group by parent-set key so siblings stay together
+    const families = new Map<string, string[]>()
+    const noParent: string[] = []
     for (const id of ids) {
-      if (placed.has(id)) continue
+      const key = (parentsOf[id] || []).slice().sort().join(',')
+      if (!key) {
+        noParent.push(id)
+      } else {
+        if (!families.has(key)) families.set(key, [])
+        families.get(key)!.push(id)
+      }
+    }
+
+    const insertWithPartner = (id: string) => {
+      if (placed.has(id)) return
       ordered.push(id)
       placed.add(id)
       const partner = couplePartner[id]
@@ -98,6 +135,14 @@ export function computeLayout(nodes: Node<PersonData>[], edges: Edge[]): Node<Pe
         placed.add(partner)
       }
     }
+
+    // Insert sibling groups sorted by age
+    for (const siblings of families.values()) {
+      for (const id of sortByAge(siblings)) insertWithPartner(id)
+    }
+    // Insert nodes without parents sorted by age
+    for (const id of sortByAge(noParent)) insertWithPartner(id)
+
     orderedByLevel[Number(lvl)] = ordered
   }
 

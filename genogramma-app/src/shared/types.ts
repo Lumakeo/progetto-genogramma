@@ -14,6 +14,7 @@ export type NodeType =
   | 'abortion-male'
   | 'abortion-female'
   | 'system-boundary'
+  | 'pet'
 
 export type EdgeType =
   | 'married'
@@ -37,6 +38,7 @@ export interface PersonData {
   adjectives: string[]
   notes?: string
   band?: Band
+  petType?: 'dog' | 'cat' | 'other'
 }
 
 export interface GenogramProject {

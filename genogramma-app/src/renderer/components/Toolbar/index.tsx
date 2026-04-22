@@ -134,6 +134,19 @@ const symbols: SymbolItem[] = [
         <ellipse cx="24" cy="16" rx="22" ry="14" fill="none" stroke="#64748b" strokeWidth="2" strokeDasharray="4 2" />
       </svg>
     )
+  },
+  {
+    type: 'pet',
+    label: 'Animale dom.',
+    preview: (
+      <svg width="36" height="36" viewBox="0 0 52 52">
+        <ellipse cx="26" cy="34" rx="13" ry="10" fill="white" stroke="#1e293b" strokeWidth="2" />
+        <ellipse cx="11" cy="20" rx="5" ry="6" fill="white" stroke="#1e293b" strokeWidth="1.5" />
+        <ellipse cx="20" cy="14" rx="5" ry="6" fill="white" stroke="#1e293b" strokeWidth="1.5" />
+        <ellipse cx="31" cy="14" rx="5" ry="6" fill="white" stroke="#1e293b" strokeWidth="1.5" />
+        <ellipse cx="40" cy="20" rx="5" ry="6" fill="white" stroke="#1e293b" strokeWidth="1.5" />
+      </svg>
+    )
   }
 ]
 

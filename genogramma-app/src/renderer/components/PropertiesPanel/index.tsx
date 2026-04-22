@@ -57,6 +57,27 @@ export function PropertiesPanel({ selectedNode, onNodeChange, onDeleteNode, onCl
       </div>
 
       <div className="flex flex-col gap-3 p-3">
+        {selectedNode.type === 'pet' && (
+          <div>
+            <label className="text-xs font-medium text-slate-500 block mb-1">Tipo animale</label>
+            <div className="flex gap-1">
+              {(['dog', 'cat', 'other'] as const).map((pt) => (
+                <button
+                  key={pt}
+                  onClick={() => updateData('petType', pt)}
+                  className={`flex-1 text-xs py-1.5 rounded border transition-colors ${
+                    (data.petType || 'other') === pt
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                  }`}
+                >
+                  {pt === 'dog' ? 'Cane' : pt === 'cat' ? 'Gatto' : 'Altro'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div>
           <label className="text-xs font-medium text-slate-500 block mb-1">Nome</label>
           <input

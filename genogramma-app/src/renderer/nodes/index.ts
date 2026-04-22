@@ -11,6 +11,7 @@ import { AbortionMaleNode } from './AbortionMaleNode'
 import { AbortionFemaleNode } from './AbortionFemaleNode'
 import { FosterChildNode } from './FosterChildNode'
 import { SystemBoundaryNode } from './SystemBoundaryNode'
+import { PetNode } from './PetNode'
 
 export const nodeTypes = {
   male: MaleNode,
@@ -25,5 +26,6 @@ export const nodeTypes = {
   'abortion-male': AbortionMaleNode,
   'abortion-female': AbortionFemaleNode,
   'foster-child': FosterChildNode,
-  'system-boundary': SystemBoundaryNode
+  'system-boundary': SystemBoundaryNode,
+  pet: PetNode
 }
