@@ -23,82 +23,117 @@ genogramma-app/
     renderer/
       App.tsx      → root, gestisce stato globale (nodi, archi, pannelli)
       nodes/       → componenti SVG per ogni tipo di simbolo
+        ageUtils.ts    → calcAge() e calcAgeAtDeath() condivise
       edges/       → componenti SVG per ogni tipo di relazione
       components/
         Canvas/    → ReactFlow canvas + BandBackground + drag&drop
         Toolbar/   → pannello simboli (drag o click per aggiungere)
-        PropertiesPanel/ → form dati persona (nome, date, professione, aggettivi, note)
-        EdgePanel/       → form tipo relazione + elimina
+        PropertiesPanel/ → form dati persona (nome, date, professione, aggettivi, note, tipo animale)
+        EdgePanel/       → form tipo relazione + anno + elimina
         ExportMenu/      → salva/carica JSON, esporta PDF/PNG
-      utils/layout.ts    → auto-layout trigenerazionale
+      utils/layout.ts    → auto-layout trigenerazionale con ordinamento fratelli per età
     shared/types.ts      → tipi condivisi (NodeType, EdgeType, PersonData, Band)
 ```
 
 ### Tipi di nodo (`NodeType`)
-| Tipo | Simbolo |
-|------|---------|
-| `male` | Quadrato |
-| `female` | Cerchio |
-| `unknown` | Rombo |
-| `deceased-male/female/unknown` | Stessa forma + X |
-| `twins-male/female` | Due simboli collegati in cima |
-| `foster-child` | Cerchio con linea tratteggiata sopra |
-| `abortion-unknown/male/female` | Forma piena nera |
-| `system-boundary` | Ellisse tratteggiata |
+| Tipo | Simbolo | Note |
+|------|---------|------|
+| `male` | Quadrato | Età calcolata dentro il simbolo |
+| `female` | Cerchio | Età calcolata dentro il simbolo |
+| `unknown` | Rombo | Età calcolata dentro il simbolo |
+| `deceased-male/female/unknown` | Stessa forma + X | Età alla morte nell'angolo superiore |
+| `twins-male/female` | Due simboli collegati in cima | Età nel simbolo sinistro |
+| `foster-child` | Cerchio con linea sopra | Età calcolata dentro il simbolo |
+| `abortion-unknown/male/female` | Forma piena nera | — |
+| `system-boundary` | Ellisse tratteggiata | z-index negativo, ridimensionabile |
+| `pet` | Zampa (paw print) | Selector Cane/Gatto/Altro nel pannello |
 
 ### Tipi di arco (`EdgeType`)
-| Tipo | Significato |
-|------|------------|
-| `parent-child` | Genitore → Figlio |
-| `married` | Sposati (`=`) |
-| `separated` | Separati (`//`) |
-| `divorced` | Divorziati (`//=`) |
-| `cohabiting` | Conviventi (`---`) |
-| `separated-cohabiting` | Separati da convivenza |
+| Tipo | Simbolo visivo | Anno |
+|------|---------------|------|
+| `parent-child` | Barra comune → drop ai figli | — |
+| `married` | Doppia linea parallela | Sì |
+| `separated` | Linea + slash | Sì |
+| `divorced` | Linea + 2 slash | Sì |
+| `cohabiting` | Tratteggiata | Sì |
+| `separated-cohabiting` | Tratteggiata + slash | Sì |
+
+### Logica barra comune (parent-child)
+`ParentChildEdge` usa `useStore(ReactFlow)` per leggere tutte le edge e i nodeInternals:
+1. Trova tutti i figli dello stesso genitore (stessa `source`)
+2. Trova il partner di coppia del genitore (se esiste)
+3. Disegna il **tronco** dal centro coppia verso il basso fino a `barY = sourceY + 45%`
+4. Disegna la **barra orizzontale** da `minChildX` a `maxChildX` a `barY`
+5. L'edge del figlio più a sinistra (primary) disegna tronco + barra; tutti disegnano il drop verticale
+
+### Ordinamento fratelli (layout.ts)
+Dopo il BFS generazionale, i fratelli (stesso set di genitori) vengono ordinati per `birthYear` **decrescente** prima di calcolare le posizioni X → il più giovane (anno più recente) è più a sinistra.
+
+### Età nei nodi
+- **Nodi vivi**: `calcAge(birthYear)` = `annoCorrente − birthYear`
+- **Nodi deceduti**: `calcAgeAtDeath(birthYear, deathYear)` = `deathYear − birthYear`
+- Testo SVG centrato dentro la forma; assente se `birthYear` non è impostato
 
 ### Fasce generazionali (`Band`)
 - `origin` — famiglia d'origine (banda superiore)
 - `nuclear` — famiglia nucleare (banda centrale)
 - `derived` — famiglia derivata / figli (banda inferiore)
 
-Ogni persona può essere assegnata a una fascia; `BandBackground` disegna le bande colorate dietro il canvas.
-
 ---
 
 ## Funzionalità implementate
 
 - [x] Canvas interattivo ReactFlow (zoom, pan, drag&drop nodi dalla toolbar)
-- [x] 13 tipi di nodi con simboli SVG conformi allo standard
+- [x] 14 tipi di nodi con simboli SVG (13 standard + animale domestico)
+- [x] Età calcolata automaticamente dentro ogni simbolo (vivi e deceduti)
 - [x] 6 tipi di relazioni con stili SVG differenziati
-- [x] PropertiesPanel: nome, data nascita/morte (giorno/mese/anno separati), professione, lista aggettivi, note
-- [x] EdgePanel: cambio tipo relazione al volo, eliminazione
+- [x] Barra comune genitore-figli (trunk → barra orizzontale → drop individuali)
+- [x] Anno relazione visualizzato sopra la linea di coppia (editabile in EdgePanel)
+- [x] Auto-layout trigenerazionale con ordinamento fratelli per età (più giovane a sinistra)
+- [x] PropertiesPanel: nome, data nascita/morte, professione, aggettivi, note, tipo animale
+- [x] EdgePanel: cambio tipo relazione, anno relazione, eliminazione
 - [x] Fasce generazionali cromatiche (BandBackground)
-- [x] Auto-layout trigenerazionale (`utils/layout.ts`)
 - [x] Salvataggio/caricamento JSON del progetto
 - [x] Esportazione PDF e PNG (`jsPDF` + `html-to-image`)
 - [x] Tasto `Delete` per rimuovere nodi/archi selezionati
 - [x] MiniMap e Controls ReactFlow
+- [x] Repository GitHub: `github.com/Lumakeo/progetto-genogramma`
 
 ---
 
 ## Evoluzione del progetto
 
-### Sessione 1 — 19 aprile 2025
-- Setup iniziale progetto con `electron-vite`, React, TypeScript, Tailwind
-- Implementazione struttura base: Canvas, Toolbar, PropertiesPanel
-- Definizione tipi (`shared/types.ts`): NodeType, EdgeType, PersonData, Band
-- Creazione di tutti i nodi SVG (13 tipi)
-- Implementazione archi personalizzati (6 tipi)
-- Aggiunta BandBackground con fasce cromatiche trigenerazionali
-- PropertiesPanel completo (dati anagrafici, aggettivi, note)
-- EdgePanel per gestione relazioni
-- ExportMenu: salva/carica JSON, esporta PDF/PNG
-- Auto-layout trigenerazionale
+### Sessione 1 — 19 aprile 2026
+- Setup iniziale con `electron-vite`, React, TypeScript, Tailwind
+- Struttura base: Canvas, Toolbar, PropertiesPanel, EdgePanel, ExportMenu
+- Definizione tipi: NodeType (13), EdgeType (6), PersonData, Band
+- Tutti i nodi SVG e gli archi personalizzati
+- BandBackground con fasce cromatiche trigenerazionali
+- Auto-layout trigenerazionale (BFS + centering bottom-up)
+- Export JSON / PDF / PNG
 
-### Sessione 2 — 22 aprile 2025
-- Creazione CLAUDE.md per documentazione e tracciamento evoluzione
-- Inizializzazione repository Git
-- Prima sincronizzazione con GitHub
+### Sessione 2 — 22 aprile 2026
+- Creazione CLAUDE.md, `.gitignore`, inizializzazione Git
+- Prima sincronizzazione con GitHub (`Lumakeo/progetto-genogramma`)
+- Installazione `gh` CLI (v2.91.0) in `~/bin/`
+- **Ordinamento fratelli**: `layout.ts` ordina i figli per `birthYear` desc (più giovane a sinistra)
+- **Nodo animale domestico** (`pet`): simbolo paw-print SVG, selector Cane/Gatto/Altro nel pannello
+- **Età dentro il simbolo**: testo SVG calcolato da `birthYear`; deceduti mostrano età alla morte
+- **Barra comune genitore-figli**: `ParentChildEdge` riscritta con `useStore` per tronco + barra orizzontale
+- **Anno sulla linea di coppia**: campo in EdgePanel, label SVG sopra la linea
+- `NodeLabel` semplificato: mostra solo nome, professione, data di morte (†)
+- `ageUtils.ts`: utility condivisa per calcolo età
+
+---
+
+## Decisioni di design (riferimenti visivi)
+
+I genogrammi di riferimento clinici usati come modello (`gen alice 2.jpg`, `gen jessica.jpg`, `Picsart_22-03-30_18-41-43-563.jpg`) definiscono:
+- Età dentro il simbolo (non nel label)
+- Barra orizzontale condivisa per fratelli
+- Anno relazione sopra la linea di coppia
+- Simbolo stella per animali (scelto di mantenere zampa per maggiore chiarezza)
+- Confine sistema come ellisse tratteggiata (nodo ridimensionabile)
 
 ---
 
@@ -112,6 +147,7 @@ Ogni persona può essere assegnata a una fascia; `BandBackground` disegna le ban
 - [ ] Multilingua (IT/EN)
 - [ ] Versione web (senza Electron)
 - [ ] Template predefiniti (es. famiglia con divorzi, adozioni)
+- [ ] Connessione parent-child anche da entrambi i genitori verso stesso figlio con barra unificata
 
 ---
 
@@ -126,6 +162,9 @@ cd genogramma-app && npm run build
 
 # Distribuibile (.dmg / .exe / .AppImage)
 cd genogramma-app && npm run dist
+
+# Push su GitHub (gh CLI in ~/bin)
+~/bin/gh auth setup-git && git push
 ```
 
 ---
@@ -135,3 +174,4 @@ cd genogramma-app && npm run dist
 - [McGoldrick & Gerson — Genograms in Family Assessment](https://www.genogram.org/)
 - [ReactFlow docs](https://reactflow.dev/)
 - [electron-vite](https://electron-vite.org/)
+- GitHub: `https://github.com/Lumakeo/progetto-genogramma`
