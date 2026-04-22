@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build output
+genogramma-app/out/
+genogramma-app/release/
+genogramma-app/dist/
+
+# Electron builder cache
+genogramma-app/.cache/
+
+# PDF e documenti locali (non versionare i PDF di riferimento)
+*.pdf
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
