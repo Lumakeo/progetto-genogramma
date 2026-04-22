@@ -1,8 +1,12 @@
 import { Handle, Position, NodeProps } from 'reactflow'
 import { PersonData } from '../../shared/types'
 import { NodeLabel } from './NodeLabel'
+import { calcAgeAtDeath } from './ageUtils'
 
 export function DeceasedMaleNode({ data, selected }: NodeProps<PersonData>) {
+  const stroke = selected ? '#3b82f6' : '#1e293b'
+  const sw = selected ? 2.5 : 2
+  const age = calcAgeAtDeath(data.birthYear, data.deathYear)
   return (
     <div className="relative flex flex-col items-center">
       <Handle type="target" position={Position.Top} id="top" />
@@ -10,14 +14,16 @@ export function DeceasedMaleNode({ data, selected }: NodeProps<PersonData>) {
       <Handle type="source" position={Position.Left} id="left" />
       <Handle type="source" position={Position.Right} id="right" />
       <svg width="52" height="52" viewBox="0 0 52 52">
-        <rect
-          x="2" y="2" width="48" height="48"
-          fill="white"
-          stroke={selected ? '#3b82f6' : '#1e293b'}
-          strokeWidth={selected ? 2.5 : 2}
-        />
-        <line x1="2" y1="2" x2="50" y2="50" stroke={selected ? '#3b82f6' : '#1e293b'} strokeWidth="2" />
-        <line x1="50" y1="2" x2="2" y2="50" stroke={selected ? '#3b82f6' : '#1e293b'} strokeWidth="2" />
+        <rect x="2" y="2" width="48" height="48" fill="white" stroke={stroke} strokeWidth={sw} />
+        <line x1="2" y1="2" x2="50" y2="50" stroke={stroke} strokeWidth="2" />
+        <line x1="50" y1="2" x2="2" y2="50" stroke={stroke} strokeWidth="2" />
+        {age !== null && (
+          <text x="26" y="13" textAnchor="middle" dominantBaseline="central"
+            fontSize="10" fontFamily="system-ui,sans-serif" fill={stroke}
+            style={{ userSelect: 'none', pointerEvents: 'none' }}>
+            {age}
+          </text>
+        )}
       </svg>
       <NodeLabel data={data} />
     </div>

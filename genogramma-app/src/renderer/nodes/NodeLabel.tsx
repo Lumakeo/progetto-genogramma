@@ -12,9 +12,8 @@ function formatDate(day?: string, month?: string, year?: string): string {
 }
 
 export function NodeLabel({ data }: Props) {
-  const birth = formatDate(data.birthDay, data.birthMonth, data.birthYear)
   const death = formatDate(data.deathDay, data.deathMonth, data.deathYear)
-  const hasInfo = data.label || data.profession || birth || death
+  const hasInfo = data.label || data.profession || death
   if (!hasInfo) return null
 
   return (
@@ -27,11 +26,6 @@ export function NodeLabel({ data }: Props) {
       {data.profession && (
         <div className="text-[10px] text-slate-500 leading-tight truncate">
           {data.profession}
-        </div>
-      )}
-      {birth && (
-        <div className="text-[10px] text-slate-500 leading-tight">
-          n.&nbsp;{birth}
         </div>
       )}
       {death && (

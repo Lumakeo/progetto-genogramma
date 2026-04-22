@@ -34,6 +34,7 @@ export interface CanvasHandle {
   updateNodeData: (id: string, data: Partial<PersonData>) => void
   deleteNode: (id: string) => void
   updateEdgeType: (id: string, type: string) => void
+  updateEdgeData: (id: string, partialData: Record<string, unknown>) => void
   deleteEdge: (id: string) => void
   autoLayout: () => void
 }
@@ -89,6 +90,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas(
     },
     updateEdgeType(id: string, type: string) {
       setEdges((eds) => eds.map((e) => e.id === id ? { ...e, type } : e))
+    },
+    updateEdgeData(id: string, partialData: Record<string, unknown>) {
+      setEdges((eds) => eds.map((e) => e.id === id ? { ...e, data: { ...e.data, ...partialData } } : e))
     },
     deleteEdge(id: string) {
       setEdges((eds) => eds.filter((e) => e.id !== id))

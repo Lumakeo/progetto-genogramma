@@ -1,10 +1,12 @@
 import { Handle, Position, NodeProps } from 'reactflow'
 import { PersonData } from '../../shared/types'
 import { NodeLabel } from './NodeLabel'
+import { calcAge } from './ageUtils'
 
 export function TwinsFemaleNode({ data, selected }: NodeProps<PersonData>) {
   const color = selected ? '#3b82f6' : '#1e293b'
   const sw = selected ? 2.5 : 2
+  const age = calcAge(data.birthYear)
   return (
     <div className="relative flex flex-col items-center">
       <Handle type="target" position={Position.Top} id="top" />
@@ -16,6 +18,13 @@ export function TwinsFemaleNode({ data, selected }: NodeProps<PersonData>) {
         <circle cx="26" cy="26" r="24" fill="white" stroke={color} strokeWidth={sw} />
         <circle cx="84" cy="26" r="24" fill="white" stroke={color} strokeWidth={sw} />
         <line x1="26" y1="2" x2="84" y2="2" stroke={color} strokeWidth={sw} />
+        {age !== null && (
+          <text x="26" y="26" textAnchor="middle" dominantBaseline="central"
+            fontSize="13" fontFamily="system-ui,sans-serif" fill={color}
+            style={{ userSelect: 'none', pointerEvents: 'none' }}>
+            {age}
+          </text>
+        )}
       </svg>
       <NodeLabel data={data} />
     </div>

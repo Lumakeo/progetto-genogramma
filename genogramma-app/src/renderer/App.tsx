@@ -36,6 +36,11 @@ export default function App() {
     setSelectedEdge((prev) => prev?.id === id ? { ...prev, type } : prev)
   }, [])
 
+  const handleEdgeDataChange = useCallback((id: string, data: Record<string, unknown>) => {
+    canvasRef.current?.updateEdgeData(id, data)
+    setSelectedEdge((prev) => prev?.id === id ? { ...prev, data: { ...prev.data, ...data } } : prev)
+  }, [])
+
   const handleDeleteEdge = useCallback((id: string) => {
     canvasRef.current?.deleteEdge(id)
     setSelectedEdge(null)
@@ -157,6 +162,7 @@ export default function App() {
           <EdgePanel
             edge={selectedEdge}
             onTypeChange={handleEdgeTypeChange}
+            onDataChange={handleEdgeDataChange}
             onDelete={handleDeleteEdge}
             onClose={() => setSelectedEdge(null)}
           />

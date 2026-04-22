@@ -14,11 +14,12 @@ const EDGE_TYPE_LABELS: { type: EdgeType; label: string }[] = [
 interface Props {
   edge: Edge
   onTypeChange: (id: string, type: EdgeType) => void
+  onDataChange: (id: string, data: Record<string, unknown>) => void
   onDelete: (id: string) => void
   onClose: () => void
 }
 
-export function EdgePanel({ edge, onTypeChange, onDelete, onClose }: Props) {
+export function EdgePanel({ edge, onTypeChange, onDataChange, onDelete, onClose }: Props) {
   return (
     <div className="w-[240px] bg-white border-l border-slate-200 flex flex-col shrink-0">
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-200">
@@ -44,6 +45,20 @@ export function EdgePanel({ edge, onTypeChange, onDelete, onClose }: Props) {
             ))}
           </select>
         </div>
+
+        {edge.type !== 'parent-child' && (
+          <div>
+            <label className="text-xs font-medium text-slate-500 block mb-1">Anno relazione</label>
+            <input
+              type="text"
+              value={(edge.data?.year as string) || ''}
+              onChange={(e) => onDataChange(edge.id, { year: e.target.value })}
+              placeholder="es. 1998"
+              maxLength={4}
+              className="w-full text-sm border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        )}
 
         <div className="pt-1 border-t border-slate-100">
           <button
