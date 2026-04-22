@@ -26,6 +26,8 @@ import { computeLayout } from '../../utils/layout'
 let nodeIdCounter = Date.now()
 const getId = () => `node_${nodeIdCounter++}`
 
+const STRUCTURAL_EDGE_TYPES = new Set<EdgeType>(['parent-child', 'adoption-child'])
+
 export interface CanvasHandle {
   addNode: (type: NodeType, position?: { x: number; y: number }) => void
   getNodes: () => Node<PersonData>[]
@@ -119,9 +121,22 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas(
 
   const onConnect = useCallback(
     (params: Connection) => {
-      setEdges((eds) => addEdge({ ...params, type: selectedEdgeTypeRef.current }, eds))
+      const edgeType = selectedEdgeTypeRef.current
+      setEdges((eds) => {
+        const nextEdges = addEdge({ ...params, type: edgeType }, eds)
+        if (STRUCTURAL_EDGE_TYPES.has(edgeType as EdgeType)) {
+          setTimeout(() => {
+            setNodes((nds) => {
+              const laid = computeLayout(nds, nextEdges)
+              setTimeout(() => rfInstanceRef.current?.fitView({ padding: 0.15, duration: 400 }), 50)
+              return laid
+            })
+          }, 0)
+        }
+        return nextEdges
+      })
     },
-    [setEdges]
+    [setEdges, setNodes]
   )
 
   const onNodeClick = useCallback(

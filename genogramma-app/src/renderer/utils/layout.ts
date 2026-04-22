@@ -12,7 +12,7 @@ const COUPLE_TYPES = new Set([
 export function computeLayout(nodes: Node<PersonData>[], edges: Edge[]): Node<PersonData>[] {
   if (nodes.length === 0) return nodes
 
-  const parentChildEdges = edges.filter((e) => e.type === 'parent-child')
+  const parentChildEdges = edges.filter((e) => e.type === 'parent-child' || e.type === 'adoption-child')
   const coupleEdges = edges.filter((e) => COUPLE_TYPES.has(e.type || ''))
 
   // Build relationship maps
